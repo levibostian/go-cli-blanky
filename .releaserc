@@ -1,0 +1,27 @@
+{
+    "tagFormat": "${version}",
+    "branches": [
+        "main",
+        { "name": "beta", "prerelease": true },
+        { "name": "alpha", "prerelease": true }
+    ],
+    "plugins": [
+        ["@semantic-release/commit-analyzer", {
+            "preset": "conventionalcommits"
+        }],
+        ["@semantic-release/release-notes-generator", {
+        "preset": "conventionalcommits"
+        }],
+        ["@semantic-release/changelog", {
+            "changelogFile": "CHANGELOG.md"
+        }],
+        "@semantic-release/github",
+        ["@semantic-release/git", {
+            "assets": ["CHANGELOG.md"],
+            "message": "chore: ${nextRelease.version}\n\n${nextRelease.notes}"
+        }],
+        ["@semantic-release/exec", {
+            "prepareCmd": "goreleaser release"
+        }]
+    ]
+}

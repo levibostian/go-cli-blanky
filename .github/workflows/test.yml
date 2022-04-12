@@ -1,0 +1,16 @@
+name: Test
+
+on: [push, pull_request]
+
+jobs:
+  test:
+    name: Automated tests 
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Get the current version of Go from project.
+        run: echo "GO_VERSION=$(go mod edit -json | jq -r .Go)" >>${GITHUB_ENV}
+      - uses: actions/setup-go@v2
+        with:
+          go-version: "${{ env.GO_VERSION }}"
+      

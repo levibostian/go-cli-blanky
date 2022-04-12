@@ -1,0 +1,52 @@
+before:
+  hooks:
+    - go mod download
+builds:
+  - env:
+      - CGO_ENABLED=0
+    main: ./main.go
+    binary: purslane
+    goos:
+    - windows
+    - darwin
+    - linux
+    ignore:
+    - goos: darwin
+      goarch: "386"
+archives:
+- replacements:
+    darwin: Darwin
+    linux: Linux
+    windows: Windows
+    386: i386
+    amd64: x86_64
+checksum:
+  name_template: 'checksums.txt'
+snapshot:
+  name_template: "{{ .Tag }}-next"
+
+dockers:
+  - image_templates:
+    - "levibostian/purslane:latest"
+    - "levibostian/purslane:{{ .Tag }}"
+  
+brews:
+  - name: purslane
+    tap:
+      owner: levibostian
+      name: homebrew-tap
+    folder: Formula
+    homepage: "https://github.com/levibostian/purslane"
+
+snapcrafts:
+  - name: purslane
+    publish: true
+    summary: Scalable, flexible, affordable, and safe way to perform periodic tasks.
+    description: Run a single docker container inside of a cloud server as if it was a CLI.
+    grade: stable
+    confinement: strict
+    license: MIT
+
+# skip changelog generation because semantic release does that for us already. Go releaser updates existing github releases if there is one.
+changelog:
+  skip: true 

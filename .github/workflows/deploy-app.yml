@@ -1,0 +1,44 @@
+name: Deploy app 
+
+on:
+  push:
+    branches: [main, beta, alpha]
+
+jobs:
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Get the current version of Go from project.
+        run: echo "GO_VERSION=$(go mod edit -json | jq -r .Go)" >>${GITHUB_ENV}
+      - uses: actions/setup-go@v2
+        with:
+          go-version: "${{ env.GO_VERSION }}"
+
+      - name: Prepare for deployment 
+        run: |
+          brew install goreleaser/tap/goreleaser
+        # docker login -u=levibostian -p="$DOCKER_PASSWORD"
+        
+      - name: Deploy via semantic release 
+        uses: cycjimmy/semantic-release-action@v2
+        with: 
+          # version numbers below can be in many forms: M, M.m, M.m.p
+          semantic_version: 19
+          extra_plugins: |
+            conventional-changelog-conventionalcommits@4
+            @semantic-release/changelog@6
+            @semantic-release/npm@9
+            @semantic-release/git@10
+            @semantic-release/github@8
+            @semantic-release/exec@6
+        env:
+          GITHUB_TOKEN: ${{ secrets.WRITE_ACCESS_BOT_TOKEN }}
+
+      - name: Copy commits into develop after main deployment 
+        uses: levibostian/action-sync-branches@v1
+        with:
+          behind: develop
+          ahead: main 
+          githubToken: ${{ secrets.WRITE_ACCESS_BOT_TOKEN }}
